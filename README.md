@@ -98,7 +98,7 @@ cargo test -p mongowire --test golden   # golden tests: byte-exact replay of rea
 ```
 
 Golden data comes from [FerretDB/wire](https://github.com/FerretDB/wire)
-testdata (`crates/mongowire/tests/data/*.hex`, hexdump format): real
+testdata (`mongowire/tests/data/*.hex`, hexdump format): real
 `isMaster`/`buildInfo` handshakes (both OP_QUERY and OP_MSG), an `insert`
 with a kind-1 document sequence, and a fuzzed malformed sample. Every valid
 frame re-encodes **byte-exactly**; the malformed one errors cleanly.

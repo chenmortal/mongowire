@@ -82,7 +82,7 @@ cargo test --workspace --all-features   # 全量:239 测试
 cargo test -p mongowire --test golden   # 黄金测试:真实 MongoDB 流量 dump 字节级往返
 ```
 
-黄金数据来自 [FerretDB/wire](https://github.com/FerretDB/wire) 的 testdata(`crates/mongowire/tests/data/*.hex`,hexdump 格式):真实 `isMaster`/`buildInfo` 握手(OP_QUERY 与 OP_MSG 两种)、带 kind-1 文档序列的 `insert`、fuzz 恶意样本。所有合法帧解析后重编码**字节级一致**;模糊样本干净报错。
+黄金数据来自 [FerretDB/wire](https://github.com/FerretDB/wire) 的 testdata(`mongowire/tests/data/*.hex`,hexdump 格式):真实 `isMaster`/`buildInfo` 握手(OP_QUERY 与 OP_MSG 两种)、带 kind-1 文档序列的 `insert`、fuzz 恶意样本。所有合法帧解析后重编码**字节级一致**;模糊样本干净报错。
 
 测试覆盖:逐字节截断(所有解析路径不 panic)、SCRAM RFC 5802/7677 官方向量、proptest 随机文档往返、端到端 socket 集成(OP_MSG/OP_QUERY/校验和/压缩/moreToCome),以及两个 cargo-fuzz 目标(`fuzz/`,见下)。
 

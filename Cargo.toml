@@ -1,9 +1,9 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/mongo_common",
-    "crates/wirebson",
-    "crates/mongowire",
+    "mongo_common",
+    "wirebson",
+    "mongowire",
     "examples/mongowire-server",
 ]
 exclude = ["fuzz"]
