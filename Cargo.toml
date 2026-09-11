@@ -4,7 +4,7 @@ members = ["mongo_common", "wirebson", "mongowire", "examples/mongowire-server"]
 exclude = ["fuzz"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.85"
 license = "Apache-2.0"
@@ -47,7 +47,7 @@ zstd = "0.13"
 # dev
 hex = "0.4"
 proptest = "1"
-mongo_common = { path = "mongo_common", version = "0.1.0" }
-wirebson = { path = "wirebson", version = "0.1.0" }
+mongo_common = { path = "mongo_common", version = "0.1.1" }
+wirebson = { path = "wirebson", version = "0.1.1" }
 [workspace.lints.rust]
 unsafe_code = "forbid"
