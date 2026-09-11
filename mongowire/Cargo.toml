@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
 description = "MongoDB wire protocol: message types, framing, compression and an embeddable tokio server"
 
 [features]
@@ -18,8 +19,8 @@ zstd = ["dep:zstd"]
 compression = ["zlib", "snappy", "zstd"]
 
 [dependencies]
-mongo_common = { path = "../mongo_common" }
-wirebson = { path = "../wirebson" }
+mongo_common = { workspace = true }
+wirebson = { workspace = true }
 bytes = { workspace = true }
 thiserror = { workspace = true }
 bitflags = { workspace = true }

@@ -4,12 +4,13 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+publish = false
 description = "Example embeddable MongoDB-wire server: hello / ping / find echo"
 
 [dependencies]
-mongowire = { path = "../../crates/mongowire", features = ["server", "compression"] }
-wirebson = { path = "../../crates/wirebson" }
-mongo_common = { path = "../../crates/mongo_common" }
+mongowire = { path = "../../mongowire", features = ["server", "compression"] }
+wirebson = { path = "../../wirebson" }
+mongo_common = { path = "../../mongo_common" }
 tokio = { workspace = true }
 bytes = { workspace = true }
 

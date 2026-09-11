@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
 description = "BSON documents for the MongoDB wire protocol: zero-copy raw documents, eager documents, shallow/deep decoding"
 
 [features]
@@ -16,7 +17,7 @@ uuid = ["mongo_common/uuid", "dep:uuid"]
 decimal128-convert = ["mongo_common/decimal128-convert"]
 
 [dependencies]
-mongo_common = { path = "../mongo_common" }
+mongo_common = { workspace = true }
 bytes = { workspace = true }
 thiserror = { workspace = true }
 serde_json = { workspace = true, optional = true }
