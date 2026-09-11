@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
 description = "Base primitives for the MongoDB wire protocol: constants, protocol IO helpers, CRC-32C, BSON scalar types and SCRAM authentication"
 
 [features]
