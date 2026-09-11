@@ -18,8 +18,8 @@ zstd = ["dep:zstd"]
 compression = ["zlib", "snappy", "zstd"]
 
 [dependencies]
-mongo_common = { path = "../mongo_common" }
-wirebson = { path = "../wirebson" }
+mongo_common = { workspace = true }
+wirebson = { workspace = true }
 bytes = { workspace = true }
 thiserror = { workspace = true }
 bitflags = { workspace = true }

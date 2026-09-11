@@ -16,7 +16,7 @@ uuid = ["mongo_common/uuid", "dep:uuid"]
 decimal128-convert = ["mongo_common/decimal128-convert"]
 
 [dependencies]
-mongo_common = { path = "../mongo_common" }
+mongo_common = { workspace = true }
 bytes = { workspace = true }
 thiserror = { workspace = true }
 serde_json = { workspace = true, optional = true }
