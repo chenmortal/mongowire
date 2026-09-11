@@ -5,6 +5,7 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+readme = "README.md"
 description = "BSON documents for the MongoDB wire protocol: zero-copy raw documents, eager documents, shallow/deep decoding"
 
 [features]
