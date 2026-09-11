@@ -1,0 +1,33 @@
+[package]
+name = "mongowire-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+mongo_common = { path = "../crates/mongo_common" }
+mongowire = { path = "../crates/mongowire" }
+wirebson = { path = "../crates/wirebson" }
+bytes = "1"
+
+# Keep the parent workspace out: this crate is built by `cargo fuzz` with
+# its own flags (sancov / libFuzzer), not as a workspace member.
+[workspace]
+
+[[bin]]
+name = "fuzz_msg"
+path = "fuzz_targets/fuzz_msg.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_document"
+path = "fuzz_targets/fuzz_document.rs"
+test = false
+doc = false
+bench = false

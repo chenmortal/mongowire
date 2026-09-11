@@ -109,7 +109,10 @@ impl Message for OpQuery {
         if name.is_empty() {
             return Err(ProtocolError::InvalidBody("empty fullCollectionName"));
         }
-        let full_collection_name = String::from_utf8_lossy(name).into_owned();
+        // Strict UTF-8: a lossy conversion would change the byte length of
+        // the name, making encode(body_len) diverge from the parsed frame.
+        let full_collection_name = String::from_utf8(name.to_vec())
+            .map_err(|_| ProtocolError::InvalidBody("invalid UTF-8 in fullCollectionName"))?;
         let number_to_skip = r.read_i32_le()?;
         let number_to_return = r.read_i32_le()?;
 

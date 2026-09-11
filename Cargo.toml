@@ -6,6 +6,7 @@ members = [
     "crates/mongowire",
     "examples/mongowire-server",
 ]
+exclude = ["fuzz"]
 
 [workspace.package]
 version = "0.1.0"

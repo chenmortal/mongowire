@@ -335,8 +335,15 @@ impl Message for OpMsg {
                     let Some(ident_len) = body[offset..sec_end].iter().position(|&b| b == 0) else {
                         return Err(ProtocolError::InvalidOpMsg("truncated section identifier"));
                     };
-                    let identifier =
-                        String::from_utf8_lossy(&body[offset..offset + ident_len]).into_owned();
+                    // Strict UTF-8: a lossy conversion would replace invalid
+                    // bytes with U+FFFD and silently change the identifier's
+                    // byte length, breaking the size accounting between
+                    // parse and encode (found by the fuzzer).
+                    let identifier = std::str::from_utf8(&body[offset..offset + ident_len])
+                        .map_err(|_| ProtocolError::InvalidOpMsg(
+                            "invalid UTF-8 in section identifier",
+                        ))?
+                        .to_owned();
                     offset += ident_len + 1;
 
                     // Documents back-to-back until exactly the section end.
@@ -788,5 +795,49 @@ mod tests {
             let result = OpMsg::parse_body(Bytes::from(body));
             assert!(result.is_err(), "body_len={body_len} must not parse");
         }
+    }
+
+    #[test]
+    fn non_utf8_section_identifier_is_rejected() {
+        // Found by cargo-fuzz: a lossy identifier conversion replaced
+        // invalid bytes with U+FFFD, changing the identifier's byte length —
+        // sections.size() then disagreed with the parsed body and
+        // re-encoding drifted. The identifier must be strict UTF-8.
+        let body_doc = raw([("insert", Bson::from("actor"))]);
+        let mut body = BytesMut::new();
+        body.put_u32_le(0); // flagBits: none
+        body.put_u8(0); // kind 0
+        body.put_bytes(body_doc.as_bytes());
+        body.put_u8(1); // kind 1
+        let size_at = body.len();
+        body.put_u32_le(0); // section size placeholder
+        body.extend_from_slice(b"doc\xff"); // identifier: invalid UTF-8 + NUL
+        body.extend_from_slice(raw([("x", Bson::Int32(1))]).as_bytes());
+        let sec_size = (body.len() - size_at) as i32;
+        body[size_at..size_at + 4].copy_from_slice(&sec_size.to_le_bytes());
+
+        assert!(matches!(
+            OpMsg::parse_body(body.freeze()),
+            Err(ProtocolError::InvalidOpMsg(
+                "invalid UTF-8 in section identifier"
+            ))
+        ));
+    }
+
+    #[test]
+    fn non_utf8_op_query_collection_name_is_rejected() {
+        use crate::messages::OpQuery;
+        let mut body = BytesMut::new();
+        body.put_i32_le(0); // flags
+        body.extend_from_slice(b"db.\xffcoll\0"); // invalid UTF-8 name
+        body.put_i32_le(0); // numberToSkip
+        body.put_i32_le(0); // numberToReturn
+        body.put_bytes(raw([("x", Bson::Int32(1))]).as_bytes());
+        assert!(matches!(
+            OpQuery::parse_body(body.freeze()),
+            Err(ProtocolError::InvalidBody(
+                "invalid UTF-8 in fullCollectionName"
+            ))
+        ));
     }
 }

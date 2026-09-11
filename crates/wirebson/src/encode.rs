@@ -1,6 +1,5 @@
 //! Document/array encoding and log-friendly formatting.
 
-use mongo_common::bson::Scalar;
 use mongo_common::bson::scalar::BinarySubtype;
 use mongo_common::io::ProtocolWrite;
 
@@ -12,7 +11,8 @@ use crate::MAX_NESTING_DEPTH;
 /// trailing NUL.
 ///
 /// # Errors
-/// [`Error::invalid`] if a string contains interior NUL bytes.
+/// [`Error::invalid`] if a field name contains interior NUL bytes, or a
+/// document exceeds the maximum BSON length.
 pub(crate) fn encode_document(doc: &crate::Document, out: &mut Vec<u8>) -> Result<(), Error> {
     let len_pos = out.placeholder_i32();
 
@@ -70,9 +70,7 @@ fn encode_value(out: &mut Vec<u8>, value: &Bson) -> Result<(), Error> {
                 return Err(Error::invalid(out.len(), "empty JavaScript scope document"));
             }
             let len_pos = out.placeholder_i32();
-            let code_start = out.len();
-            encode_string(out, code)
-                .map_err(|_| Error::invalid(code_start, "interior NUL in JavaScript code"))?;
+            encode_string(out, code)?;
             out.put_bytes(scope.as_bytes());
             patch_len(out, len_pos)
         }
@@ -81,42 +79,20 @@ fn encode_value(out: &mut Vec<u8>, value: &Bson) -> Result<(), Error> {
                 Error::invalid(out.len(), "unexpected composite value without as_scalar()")
             })?;
 
-            check_no_nul(&scalar, out.len())?;
+            // Length-prefixed strings may legally contain interior NULs —
+            // the decoder accepts them, so encode must too (an asymmetry the
+            // fuzzer caught: some decoded documents could not re-encode).
+            // NUL is still impossible in cstring positions (field names,
+            // regex pattern/options) — those go through `put_cstring`.
             mongo_common::bson::encode_scalar(&scalar, out).map_err(Error::from)?;
             Ok(())
         }
     }
 }
 
-/// BSON strings must not contain interior NUL bytes.
-fn check_no_nul(scalar: &Scalar, at: usize) -> Result<(), Error> {
-    let reason = "interior NUL in string value";
-    match scalar {
-        Scalar::String(s) | Scalar::JavaScript(s) | Scalar::Symbol(s) => {
-            if s.contains('\0') {
-                return Err(Error::invalid(at, reason));
-            }
-        }
-        Scalar::Regex(r) => {
-            if r.pattern.contains('\0') || r.options.contains('\0') {
-                return Err(Error::invalid(at, reason));
-            }
-        }
-        Scalar::DbPointer(p) => {
-            if p.namespace.contains('\0') {
-                return Err(Error::invalid(at, reason));
-            }
-        }
-        _ => {}
-    }
-    Ok(())
-}
-
-/// A length-prefixed string value: int32 (len + 1), bytes, NUL.
+/// A length-prefixed string value: int32 (len + 1), bytes, NUL. Embedded
+/// NULs are legal here (only cstring positions forbid them).
 fn encode_string(out: &mut Vec<u8>, s: &str) -> Result<(), Error> {
-    if s.as_bytes().contains(&0) {
-        return Err(Error::invalid(out.len(), "interior NUL in string value"));
-    }
     let len = i32::try_from(s.len())
         .ok()
         .and_then(|l| l.checked_add(1))
@@ -448,7 +424,10 @@ mod tests {
     }
 
     #[test]
-    fn encode_rejects_interior_nul() {
+    fn encode_rejects_interior_nul_in_field_names_only() {
+        // NUL is forbidden in cstring positions (field names) but legal in
+        // length-prefixed string VALUES — the decoder accepts those, so
+        // encode must too (fuzzer-found asymmetry).
         let mut doc = crate::Document::new();
         doc.fields.push(crate::Field {
             name: "a\0b".to_owned(),
@@ -459,19 +438,12 @@ mod tests {
             Err(Error::InvalidInput { reason, .. }) if reason.contains("field name")
         ));
 
+        // A string value with an embedded NUL round-trips byte-exactly.
         let mut doc = crate::Document::new();
         doc.add("bad", "va\0lue");
-        assert!(matches!(doc.encode(), Err(Error::InvalidInput { .. })));
-
-        let mut doc = crate::Document::new();
-        doc.add(
-            "js",
-            Bson::JavaScriptScope {
-                code: "1;\0".to_owned(),
-                scope: crate::RawDocument::default(),
-            },
-        );
-        assert!(matches!(doc.encode(), Err(Error::InvalidInput { .. })));
+        let raw = doc.encode().unwrap();
+        assert_eq!(raw.deep().unwrap(), doc);
+        assert_eq!(raw.deep().unwrap().encode().unwrap(), raw);
     }
 
     /// Every [`Bson`] variant (including nested composites, JS-with-scope,
