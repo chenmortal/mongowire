@@ -7,7 +7,7 @@
 /fuzz/Cargo.lock
 /fuzz/artifacts/
 /fuzz/coverage/
-
+/fuzz/corpus/
 # Editor
 .idea/
 .vscode/

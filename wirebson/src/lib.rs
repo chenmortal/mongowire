@@ -22,6 +22,7 @@ pub mod decode;
 pub mod document;
 pub mod encode;
 pub mod error;
+pub mod macros;
 pub mod raw;
 pub mod raw_value;
 pub mod value;

@@ -31,3 +31,10 @@ path = "fuzz_targets/fuzz_document.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "fuzz_macros"
+path = "fuzz_targets/fuzz_macros.rs"
+test = false
+doc = false
+bench = false
