@@ -1,0 +1,27 @@
+[package]
+name = "wirebson"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "BSON documents for the MongoDB wire protocol: zero-copy raw documents, eager documents, shallow/deep decoding"
+
+[features]
+default = []
+# Bson <-> serde_json::Value conversions
+serde_json = ["dep:serde_json"]
+# Uuid conversions (enables mongo_common/uuid)
+uuid = ["mongo_common/uuid", "dep:uuid"]
+# Decimal128 conversions (enables mongo_common/decimal128-convert)
+decimal128-convert = ["mongo_common/decimal128-convert"]
+
+[dependencies]
+mongo_common = { path = "../mongo_common" }
+bytes = { workspace = true }
+thiserror = { workspace = true }
+serde_json = { workspace = true, optional = true }
+uuid = { workspace = true, optional = true }
+
+[dev-dependencies]
+hex = { workspace = true }
+proptest = { workspace = true }

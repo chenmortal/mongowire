@@ -1,0 +1,18 @@
+[package]
+name = "mongowire-server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Example embeddable MongoDB-wire server: hello / ping / find echo"
+
+[dependencies]
+mongowire = { path = "../../crates/mongowire", features = ["server", "compression"] }
+wirebson = { path = "../../crates/wirebson" }
+mongo_common = { path = "../../crates/mongo_common" }
+tokio = { workspace = true }
+bytes = { workspace = true }
+
+[[bin]]
+name = "mongowire-server"
+path = "src/main.rs"

@@ -1,0 +1,14 @@
+# Vendored comparison targets (have their own git histories)
+/reference/
+
+# Build artifacts
+/target/
+/fuzz/target/
+/fuzz/Cargo.lock
+/fuzz/artifacts/
+/fuzz/coverage/
+
+# Editor
+.idea/
+.vscode/
+*.swp

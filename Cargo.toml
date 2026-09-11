@@ -1,0 +1,48 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/mongo_common",
+    "crates/wirebson",
+    "crates/mongowire",
+    "examples/mongowire-server",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+# core
+bytes = "1"
+thiserror = "2"
+bitflags = "2"
+crc32c = "0.6"
+# auth
+hmac = "0.12"
+sha1 = "0.10"
+sha2 = "0.10"
+pbkdf2 = { version = "0.12", default-features = false }
+base64 = "0.22"
+subtle = "2"
+rand = "0.8"
+# optional conversions (made optional per-crate)
+uuid = "1"
+dec = "0.4"
+serde_json = "1"
+# server feature
+tokio = { version = "1", features = ["net", "rt-multi-thread", "io-util", "macros", "time", "sync"] }
+tokio-util = { version = "0.7", features = ["codec"] }
+async-trait = "0.1"
+futures = "0.3"
+# compression
+flate2 = "1"
+snap = "1"
+zstd = "0.13"
+# dev
+hex = "0.4"
+proptest = "1"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

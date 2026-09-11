@@ -1,0 +1,37 @@
+[package]
+name = "mongowire"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "MongoDB wire protocol: message types, framing, compression and an embeddable tokio server"
+
+[features]
+default = []
+# Embeddable tokio server: codec + api layers (mirrors pgwire's server-api).
+server = ["dep:tokio", "dep:tokio-util", "dep:async-trait", "dep:futures"]
+# Per-compressor features, following the official Rust driver.
+zlib = ["dep:flate2"]
+snappy = ["dep:snap"]
+zstd = ["dep:zstd"]
+# Umbrella: everything a real deployment negotiates.
+compression = ["zlib", "snappy", "zstd"]
+
+[dependencies]
+mongo_common = { path = "../mongo_common" }
+wirebson = { path = "../wirebson" }
+bytes = { workspace = true }
+thiserror = { workspace = true }
+bitflags = { workspace = true }
+tokio = { workspace = true, optional = true }
+tokio-util = { workspace = true, optional = true }
+async-trait = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
+flate2 = { workspace = true, optional = true }
+snap = { workspace = true, optional = true }
+zstd = { workspace = true, optional = true }
+
+[dev-dependencies]
+hex = { workspace = true }
+proptest = { workspace = true }
+tokio = { workspace = true }
